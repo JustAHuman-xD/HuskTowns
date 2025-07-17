@@ -33,6 +33,7 @@ import net.william278.husktowns.audit.Log;
 import net.william278.husktowns.claim.Claim;
 import net.william278.husktowns.claim.Rules;
 import net.william278.husktowns.config.Roles;
+import net.william278.husktowns.user.Preferences;
 import net.william278.husktowns.user.User;
 import net.william278.husktowns.war.War;
 import org.jetbrains.annotations.ApiStatus;
@@ -359,7 +360,10 @@ public class Town {
      * @return the maximum number of claims this town can create
      */
     public int getMaxClaims(@NotNull HuskTowns plugin) {
-        return plugin.getLevels().getMaxClaims(level) + getBonus(Bonus.CLAIMS);
+        int memberClaimBonuses = members.keySet().stream()
+                .mapToInt(uuid -> plugin.getUserPreferences(uuid).map(Preferences::getBonusClaims).orElse(0))
+                .sum();
+        return plugin.getLevels().getMaxClaims(level) + memberClaimBonuses + getBonus(Bonus.CLAIMS);
     }
 
     /**

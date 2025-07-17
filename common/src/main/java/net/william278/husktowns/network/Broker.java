@@ -68,6 +68,7 @@ public abstract class Broker implements MessageHandler {
             case TOWN_WAR_DECLARATION_SENT -> handleTownWarDeclarationSent(message);
             case TOWN_WAR_DECLARATION_ACCEPTED -> handleTownWarDeclarationAccept(message, receiver);
             case TOWN_WAR_END -> handleTownWarEnd(message);
+            case UPDATE_USER_PREFERENCES -> handleUpdateUserPreferences(message, receiver);
             default -> plugin.log(Level.SEVERE, "Received unknown message type: " + message.getType());
         }
     }

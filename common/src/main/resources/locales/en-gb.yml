@@ -1,4 +1,5 @@
 locales:
+  purchase_bonus_claim: '[Successfully purchased a bonus claim for %1% (Total bonus claims: %2%)](#00fb9a)'
   town_created: '[Successfully founded the town of](#00fb9a) [%1%](#00fb9a bold)[! Start claiming land with](#00fb9a) [/town claim](#00fb9a italic show_text=&#00fb9a&Click to suggest suggest_command=/husktowns:town claim) [and invite members using](#00fb9a) [/town invite](#00fb9a italic show_text=&#00fb9a&Click to suggest suggest_command=/husktowns:town invite )[!](#00fb9a)'
   town_deleted: '[Successfully deleted the town of](#00fb9a) [%1%](#00fb9a bold) [and all its'' claims.](#00fb9a)'
   town_economy_deposit: '[Successfully deposited %1% into the town coffers (New coffers balance: %2%)](#00fb9a)'
@@ -219,6 +220,7 @@ locales:
   error_command_in_game_only: '[Error:](#ff3300) [This command can only be used in-game](#ff7e5e)'
   error_user_not_found: '[Error:](#ff3300) [That user could not be found](#ff7e5e)'
   error_no_invites: '[Error:](#ff3300) [You have no pending invites](#ff7e5e)'
+  error_too_fast: '[Error:](#ff3300) [You cannot execute commands that quickly! Wait before trying again!](#ff7e5e)'
   error_invalid_syntax: '[Error:](#ff3300) [Invalid syntax. Usage: %1%](#ff7e5e)'
   error_unknown_command: '[Error:](#ff3300) [Unknown command. Use](#ff7e5e) [%1%](#ff7e5e italic show_text=&#ff7e5e&Click to view a list of commands run_command=%1%) [to see a list of commands](#ff7e5e)'
   error_invalid_color: '[Error:](#ff3300) [Invalid hexadecimal color code](#ff7e5e)'

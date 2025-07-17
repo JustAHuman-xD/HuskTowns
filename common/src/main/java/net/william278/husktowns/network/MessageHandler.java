@@ -27,6 +27,7 @@ import net.william278.husktowns.town.Member;
 import net.william278.husktowns.town.Role;
 import net.william278.husktowns.town.Town;
 import net.william278.husktowns.user.OnlineUser;
+import net.william278.husktowns.user.Preferences;
 import net.william278.husktowns.user.SavedUser;
 import net.william278.husktowns.user.User;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,18 @@ import java.util.logging.Level;
 
 public interface MessageHandler {
 
+    default void handleUpdateUserPreferences(@NotNull Message message, @Nullable OnlineUser receiver) {
+        if (receiver == null) {
+            return;
+        }
+
+        message.getPayload().getUuid().ifPresent(uuid -> {
+            Preferences preferences = getPlugin().getDatabase().getUser(uuid).map(SavedUser::preferences)
+                    .orElse(Preferences.getDefaults());
+            getPlugin().setUserPreferences(uuid, preferences);
+        });
+    }
+
     // Handle inbound user list requests
     default void handleRequestUserList(@NotNull Message message, @Nullable OnlineUser receiver) {
         if (receiver == null) {
@@ -45,7 +58,7 @@ public interface MessageHandler {
 
         Message.builder()
                 .type(Message.Type.UPDATE_USER_LIST)
-                .payload(Payload.userList(getPlugin().getOnlineUsers().stream().map(online -> (User) online).toList()))
+                .payload(Payload.userList(getPlugin().getOnlineUsers().stream().map(User.class::cast).toList()))
                 .target(message.getSourceServer(), Message.TargetType.SERVER).build()
                 .send(getBroker(), receiver);
     }

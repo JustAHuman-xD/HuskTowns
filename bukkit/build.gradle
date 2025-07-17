@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation project(path: ':common')
+    implementation 'com.github.Redempt:Crunch:2.0.3'
 
     implementation 'net.kyori:adventure-platform-bukkit:4.4.0'
     implementation 'io.papermc:paperlib:1.0.8'

@@ -77,6 +77,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import redempt.crunch.CompiledExpression;
 import space.arim.morepaperlib.MorePaperLib;
 import space.arim.morepaperlib.commands.CommandRegistration;
 import space.arim.morepaperlib.scheduling.AsynchronousScheduler;
@@ -118,6 +119,8 @@ public class BukkitHuskTowns extends JavaPlugin implements HuskTowns, BukkitTask
     private Set<Hook> hooks = Sets.newHashSet();
     @Setter
     private Settings settings;
+    @Setter
+    private CompiledExpression bonusClaimsFormula;
     @Setter
     private Locales locales;
     @Setter
@@ -234,6 +237,15 @@ public class BukkitHuskTowns extends JavaPlugin implements HuskTowns, BukkitTask
         initializeMetrics();
         log(Level.INFO, "Enabled HuskTowns v" + getPluginVersion());
         checkForUpdates();
+
+        // Start Preferences Cleanup Task
+        getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            for (UUID uuid : new HashSet<>(userPreferences.keySet())) {
+                if (!onlineUserMap.containsKey(uuid)) {
+                    userPreferences.remove(uuid);
+                }
+            }
+        }, 20 * 60 * 10, 20 * 60 * 10);
     }
 
     @Override

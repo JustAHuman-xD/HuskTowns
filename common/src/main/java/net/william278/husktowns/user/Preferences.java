@@ -66,6 +66,10 @@ public class Preferences {
     @Nullable
     private Set<String> completedAdvancements;
 
+    @Expose
+    @SerializedName("bonus_claims")
+    private int bonusClaims;
+
     /**
      * Get the default user {@link Preferences}
      *
@@ -79,7 +83,8 @@ public class Preferences {
             false,
             true,
             false,
-            false
+            false,
+            0
         );
     }
 
@@ -91,20 +96,21 @@ public class Preferences {
      * @param townMessages     If the user is receiving town notifications
      * @param autoClaimingLand If the user is auto-claiming land
      * @param ignoringClaims   If the user is ignoring claims
+     * @param bonusClaims      How many bonus claims the user has
      * @since 2.0
      */
     private Preferences(boolean townChatTalking, boolean townChatSpying, boolean townMessages,
-                        boolean autoClaimingLand, boolean ignoringClaims) {
+                        boolean autoClaimingLand, boolean ignoringClaims, int bonusClaims) {
         this.townChatTalking = townChatTalking;
         this.townChatSpying = townChatSpying;
         this.townMessages = townMessages;
         this.autoClaimingLand = autoClaimingLand;
         this.ignoringClaims = ignoringClaims;
+        this.bonusClaims = bonusClaims;
     }
 
     @SuppressWarnings("unused")
-    private Preferences() {
-    }
+    private Preferences() {}
 
     /**
      * Get if the user is talking in town chat
@@ -301,5 +307,33 @@ public class Preferences {
      */
     public void resetAdvancements() {
         completedAdvancements = null;
+    }
+
+    /**
+     * Get the number of bonus claims the user has
+     *
+     * @since 3.2
+     */
+    public int getBonusClaims() {
+        return bonusClaims;
+    }
+
+    /**
+     * Increment the number of bonus claims the user has
+     *
+     * @since 3.2
+     */
+    public void incrementBonusClaims() {
+        this.bonusClaims++;
+    }
+
+    /**
+     * Set the number of bonus claims the user has
+     *
+     * @param bonusClaims the number of bonus claims
+     * @since 3.2
+     */
+    public void setBonusClaims(int bonusClaims) {
+        this.bonusClaims = bonusClaims;
     }
 }

@@ -25,6 +25,9 @@ import de.exlll.configlib.YamlConfigurationStore;
 import de.exlll.configlib.YamlConfigurations;
 import net.william278.husktowns.HuskTowns;
 import org.jetbrains.annotations.NotNull;
+import redempt.crunch.CompiledExpression;
+import redempt.crunch.Crunch;
+import redempt.crunch.functional.EvaluationEnvironment;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -55,12 +58,20 @@ public interface ConfigProvider {
 
     void setSettings(@NotNull Settings settings);
 
+    @NotNull
+    CompiledExpression getBonusClaimsFormula();
+
+    void setBonusClaimsFormula(@NotNull CompiledExpression bonusClaimsFormula);
+
     default void loadSettings() {
         setSettings(YamlConfigurations.update(
             getConfigDirectory().resolve("config.yml"),
             Settings.class,
             YAML_CONFIGURATION_PROPERTIES.header(Settings.CONFIG_HEADER).build()
         ));
+        EvaluationEnvironment env = new EvaluationEnvironment();
+        env.setVariableNames("bonusClaims");
+        setBonusClaimsFormula(Crunch.compileExpression(getSettings().getGeneral().getBonusClaimCostFormula(), env));
     }
 
     @NotNull

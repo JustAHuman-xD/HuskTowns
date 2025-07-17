@@ -67,6 +67,9 @@ public class Settings {
         "t"
     );
 
+    @Comment("Cooldown between command executions in ticks. This is to prevent command spam and abuse. Set to 0 to disable.")
+    private int commandCooldown = 20;
+
     // Database settings
     @Comment("Database settings")
     private DatabaseSettings database = new DatabaseSettings();
@@ -227,6 +230,12 @@ public class Settings {
             "If disabled, or if Vault is not installed, the built-in town points currency will be used instead. " +
             "Docs: https://william278.net/docs/husktowns/hooks")
         private boolean economyHook = true;
+
+        @Comment("The formula for the cost of the next bonus claim a player can purchase")
+        private String bonusClaimCostFormula = "1000 * (1.1 ^ bonusClaims)";
+
+        @Comment("The maximum number of bonus claims a player can purchase.")
+        private int maxBonusClaims = 64;
 
         @Comment("Hook with LuckPerms to provide town permission contexts. Docs: https://william278.net/docs/husktowns/hooks")
         private boolean luckpermsContextsHook = true;

@@ -29,10 +29,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class Command extends Node implements TabProvider {
+    private static final Set<UUID> COMMAND_COOLDOWN = ConcurrentHashMap.newKeySet();
 
     public List<ChildCommand> children;
     private Executable defaultExecutor;
@@ -59,6 +63,9 @@ public abstract class Command extends Node implements TabProvider {
 
     @Override
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
+        if (executor instanceof OnlineUser user && !setCooldown(user)) {
+            return;
+        }
         if (!executor.hasPermission(getPermission())) {
             plugin.getLocales().getLocale("error_no_permission")
                 .ifPresent(executor::sendMessage);
@@ -92,6 +99,16 @@ public abstract class Command extends Node implements TabProvider {
             return;
         }
         this.defaultExecutor.execute(executor, args);
+    }
+
+    public boolean setCooldown(OnlineUser user) {
+        if (COMMAND_COOLDOWN.add(user.getUuid())) {
+            plugin.runAsyncDelayed(() -> COMMAND_COOLDOWN.remove(user.getUuid()), plugin.getSettings().getCommandCooldown());
+            return true;
+        } else {
+            plugin.getLocales().getLocale("error_too_fast").ifPresent(user::sendMessage);
+            return false;
+        }
     }
 
     @Override

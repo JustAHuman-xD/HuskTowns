@@ -22,11 +22,17 @@ package net.william278.husktowns.command;
 import net.william278.husktowns.HuskTowns;
 import net.william278.husktowns.claim.Chunk;
 import net.william278.husktowns.claim.World;
+import net.william278.husktowns.hook.EconomyHook;
+import net.william278.husktowns.network.Message;
+import net.william278.husktowns.network.Payload;
 import net.william278.husktowns.town.Member;
 import net.william278.husktowns.town.Town;
 import net.william278.husktowns.user.CommandUser;
 import net.william278.husktowns.user.OnlineUser;
+import net.william278.husktowns.user.Preferences;
+import net.william278.husktowns.user.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -42,6 +48,7 @@ public final class AdminTownCommand extends Command {
         setDefaultExecutor(getHelpCommand());
 
         final ArrayList<ChildCommand> childCommands = new ArrayList<>(Arrays.asList(
+            new TryPurchaseBonusClaim(this, plugin),
             new AdminClaimCommand(this, plugin, true),
             new AdminClaimCommand(this, plugin, false),
             new AdminToggleCommand(this, plugin, AdminToggleCommand.Type.IGNORE_CLAIMS),
@@ -68,6 +75,70 @@ public final class AdminTownCommand extends Command {
             return;
         }
         super.execute(executor, args);
+    }
+
+    private static class TryPurchaseBonusClaim extends ChildCommand implements TabProvider {
+        protected TryPurchaseBonusClaim(@NotNull Command parent, @NotNull HuskTowns plugin) {
+            super("trypurchasebonusclaim", List.of(), parent, "<player>", plugin);
+            setOperatorCommand(true);
+            setConsoleExecutable(true);
+        }
+
+        @Override
+        public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
+            final String username = parseStringArg(args, 0).orElse("");
+            OnlineUser user = plugin.getOnlineUsers().stream()
+                    .filter(onlineUser -> onlineUser.getUsername().equalsIgnoreCase(username))
+                    .findFirst().orElse(null);
+
+            if (user == null) {
+                plugin.getLocales().getLocale("error_invalid_syntax", getUsage())
+                        .ifPresent(executor::sendMessage);
+                return;
+            }
+
+            Preferences preferences = plugin.getUserPreferences(user.getUuid()).orElse(null);
+            if (preferences == null) {
+                plugin.getLocales().getLocale("error_user_not_found", username)
+                        .ifPresent(executor::sendMessage);
+                return;
+            }
+
+            final Optional<EconomyHook> optionalHook = plugin.getEconomyHook();
+            if (optionalHook.isEmpty()) {
+                plugin.getLocales().getLocale("error_economy_not_in_use")
+                        .ifPresent(user::sendMessage);
+                return;
+            }
+
+            final EconomyHook economy = optionalHook.get();
+            final BigDecimal amount = BigDecimal.valueOf(plugin.getBonusClaimsFormula().evaluate(preferences.getBonusClaims()));
+            if (!economy.takeMoney(user, amount, "Purchase Bonus Claim")) {
+                plugin.getLocales().getLocale("error_economy_insufficient_funds",
+                        economy.formatMoney(amount)).ifPresent(user::sendMessage);
+                return;
+            }
+
+            preferences.incrementBonusClaims();
+            plugin.getLocales().getLocale("purchase_bonus_claim",
+                    economy.formatMoney(amount), String.valueOf(preferences.getBonusClaims())).ifPresent(user::sendMessage);
+            plugin.setUserPreferences(user.getUuid(), preferences);
+            plugin.getDatabase().updateUser(user, preferences);
+
+            if (plugin.getSettings().getCrossServer().isEnabled()) {
+                plugin.getMessageBroker().ifPresent(broker -> Message.builder()
+                        .type(Message.Type.UPDATE_USER_PREFERENCES)
+                        .payload(Payload.uuid(user.getUuid()))
+                        .target("all", Message.TargetType.SERVER)
+                        .build()
+                        .send(broker, user));
+            }
+        }
+
+        @Override
+        public @Nullable List<String> suggest(@NotNull CommandUser user, @NotNull String[] args) {
+            return plugin.getUserList().stream().map(User::getUsername).toList();
+        }
     }
 
     private static class AdminClaimCommand extends ChildCommand implements ChunkTabProvider {

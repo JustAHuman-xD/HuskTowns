@@ -30,8 +30,8 @@ import net.william278.husktowns.claim.TownClaim;
 import net.william278.husktowns.town.Member;
 import net.william278.husktowns.town.Role;
 import net.william278.husktowns.town.Town;
-import net.william278.husktowns.user.BukkitUser;
 import net.william278.husktowns.user.OnlineUser;
+import net.william278.husktowns.user.Preferences;
 import net.william278.husktowns.user.User;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -98,6 +98,17 @@ public class PlaceholderAPIHook extends Hook {
 
             // Return the requested placeholder
             final OnlineUser player = plugin.getOnlineUser(offlinePlayer.getUniqueId());
+            if (params.equals("bonus_claims")) {
+                return plugin.getUserPreferences(player.getUuid()).map(Preferences::getBonusClaims)
+                    .map(String::valueOf)
+                    .orElse("0");
+            }
+
+            if (params.equals("bonus_claims_cost")) {
+                int bonusClaims = plugin.getUserPreferences(player.getUuid()).map(Preferences::getBonusClaims).orElse(0);
+                return String.valueOf(plugin.getBonusClaimsFormula().evaluate(bonusClaims));
+            }
+
             if (params.startsWith("town_")) {
                 if (params.length() == 5) {
                     return null;

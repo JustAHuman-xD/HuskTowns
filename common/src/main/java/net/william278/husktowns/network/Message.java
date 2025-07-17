@@ -215,7 +215,11 @@ public class Message {
         /**
          * A message containing a list of users on a server
          */
-        UPDATE_USER_LIST
+        UPDATE_USER_LIST,
+        /**
+         * A message containing a player to update the preferences of
+         */
+        UPDATE_USER_PREFERENCES
     }
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)

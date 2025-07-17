@@ -133,7 +133,12 @@ public interface HuskTowns extends Task.Supplier, ConfigProvider, EventDispatche
     }
 
     default Optional<Preferences> getUserPreferences(@NotNull UUID uuid) {
-        return Optional.ofNullable(getUserPreferences().get(uuid));
+        Preferences cached = getUserPreferences().get(uuid);
+        if (cached == null) {
+            cached = getDatabase().getUser(uuid).map(SavedUser::preferences).orElse(Preferences.getDefaults());
+            setUserPreferences(uuid, cached);
+        }
+        return Optional.of(cached);
     }
 
     default void editUserPreferences(@NotNull User user, @NotNull Consumer<Preferences> consumer) {
