@@ -104,6 +104,13 @@ public final class AdminTownCommand extends Command {
                 return;
             }
 
+            if (preferences.getBonusClaims() >= plugin.getSettings().getGeneral().getMaxBonusClaims()) {
+                plugin.getLocales().getLocale("error_max_bonus_claims_reached",
+                        String.valueOf(preferences.getBonusClaims()), String.valueOf(plugin.getSettings().getGeneral().getMaxBonusClaims()))
+                        .ifPresent(user::sendMessage);
+                return;
+            }
+
             final Optional<EconomyHook> optionalHook = plugin.getEconomyHook();
             if (optionalHook.isEmpty()) {
                 plugin.getLocales().getLocale("error_economy_not_in_use")
@@ -121,7 +128,8 @@ public final class AdminTownCommand extends Command {
 
             preferences.incrementBonusClaims();
             plugin.getLocales().getLocale("purchase_bonus_claim",
-                    economy.formatMoney(amount), String.valueOf(preferences.getBonusClaims())).ifPresent(user::sendMessage);
+                    economy.formatMoney(amount), String.valueOf(preferences.getBonusClaims()), String.valueOf(plugin.getSettings().getGeneral().getMaxBonusClaims()))
+                    .ifPresent(user::sendMessage);
             plugin.setUserPreferences(user.getUuid(), preferences);
             plugin.getDatabase().updateUser(user, preferences);
 

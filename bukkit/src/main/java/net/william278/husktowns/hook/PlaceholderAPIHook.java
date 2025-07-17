@@ -90,6 +90,10 @@ public class PlaceholderAPIHook extends Hook {
                 return getTownLeaderboard(params.substring(17));
             }
 
+            if (params.equals("max_bonus_claims")) {
+                return String.valueOf(plugin.getSettings().getGeneral().getMaxBonusClaims());
+            }
+
             // Ensure the player is online
             if (offlinePlayer == null || !offlinePlayer.isOnline() || offlinePlayer.getPlayer() == null) {
                 return plugin.getLocales().getRawLocale("placeholder_player_offline")
